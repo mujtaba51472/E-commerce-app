@@ -1,42 +1,51 @@
-import React, { useEffect } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
- import { selectedProduct  , removeSelectedProduct} from "../redux/actions/productAction";
-const ProductDetail = () => {
-  const { productId } = useParams();
-  let product = useSelector((state) => state.product);
-  console.log('pooooof' , product.title)
-  const { image, title, price, category, description } = product;
-  const dispatch = useDispatch();
-  const fetchProductDetail = async (id) => {
-    const response = await axios
-      .get(`https://fakestoreapi.com/products/${id}`)
-      .catch((err) => {
-        console.log("Err: ", err);
-      });
-    dispatch(selectedProduct(response.data));
-  };
+import React, { Component } from "react";
+import { connect } from "react-redux";
+class ProductDetail extends Component {
+  constructor(props) {
+    super(props);
 
-  useEffect(() => {
-    if (productId && productId !== "") fetchProductDetail(productId);
-   
-    return () => {
-      dispatch(removeSelectedProduct());
+    this.state = {
+      product: {},
+      loading: false,
     };
+  }
+  componentDidMount(){
+    this.fetchingProduct()
+  }
+  fetchingProduct =  ()=> {
+    this.setState(({
+      loading:true
+    }))
+    let {product}= this.state
+    if(this.props.product.singleProductFetchingSuccess){
+      product=this.props.product.data
+      
+     
+
+  }
+  this.setState({
+    product,
+    loading:false
+
+
+  })
+  }
   
-  }, [productId]);
-  return (
-    <div className="ui grid container">
-      {Object.keys(product).length === 0 ? (
-        <div>...Loading</div>
-      ) : (
-        <div className="ui placeholder segment">
+ 
+ 
+
+  render() {
+    const { image, title, price, category, description } = this.state.product;
+
+    return (
+      <>
+
+          <div className="ui placeholder segment">
           <div className="ui two column stackable center aligned grid">
             <div className="ui vertical divider">AND</div>
             <div className="middle aligned row">
               <div className="column lp">
-                <img className="ui fluid image" src={image}  alt={title}/>
+                <img className="ui fluid image" src={image}/>
               </div>
               <div className="column rp">
                 <h1>{title}</h1>
@@ -55,9 +64,15 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
+        </>
+    );
+  }
+}
 
-export default ProductDetail;
+const mapStateToProps = (state) => {
+  console.log("sngeee", state.product);
+  return {
+    product: state.product,
+  };
+};
+export default connect(mapStateToProps, null)(ProductDetail);
